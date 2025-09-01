@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../src/services/supabase';
 
-export const useNearbyPropertiesAndSchools = (radiusKm = 5) => {
+export const useNearbyPropertiesAndSchools = (radiusKm = 5, refreshTrigger = 0) => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
@@ -98,7 +98,7 @@ export const useNearbyPropertiesAndSchools = (radiusKm = 5) => {
     };
 
     fetchData();
-  }, [radiusKm]);
+  }, [radiusKm, refreshTrigger]);
 
   return { loading, data, error };
 };

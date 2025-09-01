@@ -9,10 +9,11 @@ import Listings from './MapComp/Listings';
 const JustForU = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [pickLocationMode, setPickLocationMode] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { data: userInfo } = useUserFullInfo();
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radiusKm, setRadiusKm] = useState(70);
-  const { data, loading: justLoad } = useNearbyPropertiesAndSchools(radiusKm);
+  const { data, loading: justLoad } = useNearbyPropertiesAndSchools(radiusKm, refreshTrigger);
 
   const toggleRef = useRef(null);
   const [topPadding, setTopPadding] = useState(100); // default spacing for toggle
@@ -85,6 +86,8 @@ const JustForU = () => {
           setPickLocationMode={setPickLocationMode}
           selectedLocation={selectedLocation}
           setSelectedLocation={setSelectedLocation}
+          refreshTrigger={refreshTrigger}
+          onSave={() => setRefreshTrigger((prev) => prev + 1)}
         />
       </div>
 

@@ -11,6 +11,7 @@ const SlidePanel = ({
   pickLocationMode,
   setPickLocationMode,
   selectedLocation,
+  onsave,
 }) => {
   const user = userInfo?.[0] || null;
 
@@ -292,6 +293,7 @@ const SlidePanel = ({
       userData.workplace_location || { latitude: 25.224, longitude: 55.276 }; // Default to Dubai if nothing selected
     const result = await saveFamilyData(familySize, locationToSave, userData.children);
     if (result?.success) {
+      if (onsave) onsave();
       setShowTick(true);
       setTimeout(() => {
         setShowTick(false);

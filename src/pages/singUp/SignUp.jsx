@@ -1,6 +1,5 @@
 // File: src/pages/SignUp/SignUp.jsx
 import React, { useState } from 'react';
-
 import styles from './SignUp.module.css';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../../hooks/useAuth';
@@ -22,10 +21,7 @@ const SignUp = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -41,9 +37,7 @@ const SignUp = () => {
 
     if (data) {
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/app');
-      }, 1500);
+      setTimeout(() => navigate('/app'), 1500);
     }
   };
 
@@ -62,9 +56,6 @@ const SignUp = () => {
 
               {/* Full Name */}
               <div className={styles.formGroup}>
-                <label htmlFor="fullName" className={styles.formLabel}>
-                  Full Name
-                </label>
                 <input
                   type="text"
                   id="fullName"
@@ -72,16 +63,13 @@ const SignUp = () => {
                   value={formData.fullName}
                   onChange={handleChange}
                   className={styles.formInput}
-                  placeholder="Enter your full name"
+                  placeholder="Full Name"
                   required
                 />
               </div>
 
               {/* Email */}
               <div className={styles.formGroup}>
-                <label htmlFor="email" className={styles.formLabel}>
-                  Email Address
-                </label>
                 <input
                   type="email"
                   id="email"
@@ -89,16 +77,13 @@ const SignUp = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={styles.formInput}
-                  placeholder="Enter your email address"
+                  placeholder="Email Address"
                   required
                 />
               </div>
 
               {/* Password */}
               <div className={styles.formGroup}>
-                <label htmlFor="password" className={styles.formLabel}>
-                  Password
-                </label>
                 <input
                   type="password"
                   id="password"
@@ -106,16 +91,13 @@ const SignUp = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className={styles.formInput}
-                  placeholder="Create a secure password"
+                  placeholder="Password"
                   required
                 />
               </div>
 
               {/* Confirm Password */}
               <div className={styles.formGroup}>
-                <label htmlFor="confirmPassword" className={styles.formLabel}>
-                  Confirm Password
-                </label>
                 <input
                   type="password"
                   id="confirmPassword"
@@ -123,7 +105,7 @@ const SignUp = () => {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className={styles.formInput}
-                  placeholder="Confirm your password"
+                  placeholder="Confirm Password"
                   required
                 />
               </div>
@@ -137,7 +119,7 @@ const SignUp = () => {
                     style={{ height: 40, width: 40 }}
                   />
                 ) : success ? (
-                  <TickAnimation size={40} strokeColor="#FFF" />
+                  <TickAnimation size={40} strokeColor="#fff" />
                 ) : (
                   'Create Account'
                 )}

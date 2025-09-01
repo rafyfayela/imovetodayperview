@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router';
 import styles from './LandingPage.module.css';
 import { motion } from 'framer-motion';
+import moveuae from './moveuae.png';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -39,7 +40,14 @@ const LandingPage = () => {
             </button>
           </div>
           <div className={styles.heroImage}>
-            <div className={styles.imagePlaceholder}></div>
+            <motion.img
+              src={moveuae}
+              alt="Move UAE"
+              className={styles.imagePlaceholder}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+            />
           </div>
         </section>
 
@@ -56,11 +64,13 @@ const LandingPage = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <circle cx="12" cy="12" r="10" stroke="#E41B23" strokeWidth="2" />
                   <path
-                    d="M12 15L12 18M12 6L12 9M9 12L6 12M18 12L15 12M4.9375 19.0625L7.75 16.25M16.25 7.75L19.0625 4.9375M4.9375 4.9375L7.75 7.75M16.25 16.25L19.0625 19.0625"
+                    d="M8 12.5L11 15.5L16 9.5"
                     stroke="#E41B23"
                     strokeWidth="2"
                     strokeLinecap="round"
+                    strokeLinejoin="round"
                   />
                 </svg>
               </div>
@@ -77,12 +87,64 @@ const LandingPage = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path
-                    d="M11 4.99992H4V11.9999M4 11.9999V18.9999H11M4 11.9999L17 11.9999M17 11.9999V4.99992H20V18.9999H17M17 11.9999L13 8.99992M13 8.99992V14.9999M13 8.99992L17 4.99992"
+                  <circle cx="6" cy="12" r="2" stroke="#00843D" strokeWidth="2" />
+                  <line
+                    x1="6"
+                    y1="4"
+                    x2="6"
+                    y2="10"
                     stroke="#00843D"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    strokeLinejoin="round"
+                  />
+                  <line
+                    x1="6"
+                    y1="14"
+                    x2="6"
+                    y2="20"
+                    stroke="#00843D"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+
+                  <circle cx="12" cy="6" r="2" stroke="#00843D" strokeWidth="2" />
+                  <line
+                    x1="12"
+                    y1="2"
+                    x2="12"
+                    y2="4"
+                    stroke="#00843D"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="12"
+                    y1="8"
+                    x2="12"
+                    y2="22"
+                    stroke="#00843D"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+
+                  <circle cx="18" cy="16" r="2" stroke="#00843D" strokeWidth="2" />
+                  <line
+                    x1="18"
+                    y1="4"
+                    x2="18"
+                    y2="14"
+                    stroke="#00843D"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1="18"
+                    y1="18"
+                    x2="18"
+                    y2="20"
+                    stroke="#00843D"
+                    strokeWidth="2"
+                    strokeLinecap="round"
                   />
                 </svg>
               </div>
@@ -99,12 +161,14 @@ const LandingPage = () => {
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <circle cx="12" cy="12" r="10" stroke="#000000" strokeWidth="2" />
+                  <circle cx="9" cy="10" r="1" fill="#000000" />
+                  <circle cx="15" cy="10" r="1" fill="#000000" />
                   <path
-                    d="M7 16C7 16 8.5 14 12 14C15.5 14 17 16 17 16M12 8.5H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                    d="M8 16C9.33333 17.3333 14.6667 17.3333 16 16"
                     stroke="#000000"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    strokeLinejoin="round"
                   />
                 </svg>
               </div>
