@@ -5,8 +5,8 @@
   padding: 2rem 1.5rem;
   font-family: 'Inter', sans-serif;
   color: #1f2937;
-  background-color: #f9fafb;
   min-height: 100vh;
+  padding-top: 50px;
 }
 
 /* Page title */

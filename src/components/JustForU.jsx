@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import MapComponent from './MapComp/MapComponent';
 import SlidePanel from './MapComp/SlidePanel';
 import { FaChevronRight, FaChevronLeft } from 'react-icons/fa';
@@ -13,9 +13,18 @@ const JustForU = () => {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [radiusKm, setRadiusKm] = useState(70);
   const { data, loading: justLoad } = useNearbyPropertiesAndSchools(radiusKm);
-  // console.log('Schools:', JSON.stringify(schools, null, 2));
-  console.log('Propertiesssssssssssss:', JSON.stringify(data?.properties, null, 2));
 
+  const toggleRef = useRef(null);
+  const [topPadding, setTopPadding] = useState(100); // default spacing for toggle
+
+  // Open panel if no children
+  useEffect(() => {
+    if (userInfo && (!userInfo.children || userInfo.children.length === 0)) {
+      setIsPanelOpen(true);
+    }
+  }, [userInfo]);
+
+  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -23,18 +32,28 @@ const JustForU = () => {
     };
   }, []);
 
+  // Dynamically adjust top padding based on toggle button height
+  useEffect(() => {
+    if (toggleRef.current) {
+      setTopPadding(toggleRef.current.offsetHeight + 20); // 20px extra spacing
+    }
+  }, [toggleRef.current]);
+
   return (
-    <div style={{ display: 'flex', height: '100vh' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {/* Left side: listings + slide panel */}
       <div
         style={{
           flex: 1,
-          padding: '100px 20px 20px 20px',
-          overflow: 'hidden',
+          padding: '0 20px',
+          overflow: 'auto',
           backgroundColor: '#f0f0f0',
           position: 'relative',
         }}
       >
+        {/* Toggle button */}
         <div
+          ref={toggleRef}
           onClick={() => setIsPanelOpen(!isPanelOpen)}
           style={{
             position: 'fixed',
@@ -52,7 +71,11 @@ const JustForU = () => {
           {isPanelOpen ? <FaChevronLeft size={20} /> : <FaChevronRight size={20} />}
         </div>
 
-        <Listings schools={data?.schools || []} properties={data?.properties || []} />
+        <Listings
+          topPadding={topPadding}
+          schools={data?.schools || []}
+          properties={data?.properties || []}
+        />
 
         <SlidePanel
           isOpen={isPanelOpen}
@@ -65,7 +88,8 @@ const JustForU = () => {
         />
       </div>
 
-      <div style={{ flex: 1, backgroundColor: '#ddd' }}>
+      {/* Right side: map */}
+      <div style={{ flex: 1, backgroundColor: '#ddd', overflow: 'hidden' }}>
         <MapComponent
           pickLocationMode={pickLocationMode}
           properties={data?.properties || []}

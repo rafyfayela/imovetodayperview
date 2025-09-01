@@ -29,16 +29,14 @@ const PropertyList = () => {
   const filterOptions = ['all', 'rent', 'buy'];
 
   return (
-    <div style={{ flex: '1' }}>
+    <div style={{ flex: '1', paddingTop: 70 }}>
       {/* Filter Bar (only when no search) */}
       {!search && (
         <div className={styles.filterContainer}>
           {filterOptions.map((option) => (
             <button
               key={option}
-              className={`${styles.filterButton} ${
-                filter === option ? styles.activeFilter : ''
-              }`}
+              className={`${styles.filterButton} ${filter === option ? styles.activeFilter : ''}`}
               onClick={() => setFilter(option)}
             >
               {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -57,9 +55,7 @@ const PropertyList = () => {
       <div className={styles.propertiesGrid}>
         {!displayLoading &&
           !displayError &&
-          displayProperties.map((property) => (
-            <ReusableCard key={property.id} item={property} />
-          ))}
+          displayProperties.map((property) => <ReusableCard key={property.id} item={property} />)}
       </div>
     </div>
   );

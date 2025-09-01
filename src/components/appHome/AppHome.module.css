@@ -1,11 +1,9 @@
 .appHome {
-  padding: 40px 20px;
+  padding: 70px 20px;
   background-color: #f9f9f9;
   min-height: 100vh;
   position: relative;
 }
-
-
 
 .section {
   max-width: 1200px;
@@ -96,7 +94,6 @@
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
-
 
 .homePage {
   padding: 20px;

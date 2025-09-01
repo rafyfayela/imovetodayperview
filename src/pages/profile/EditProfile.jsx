@@ -80,7 +80,7 @@ const EditProfile = () => {
   };
 
   return (
-    <div>
+    <div style={{ paddingTop: '50px' }}>
       <ToastContainer position="top-right" autoClose={1500} hideProgressBar />
       <form onSubmit={handleSubmit} className={styles.editForm}>
         <h1>Edit Profile</h1>
@@ -102,51 +102,6 @@ const EditProfile = () => {
             value={formData.nationality || ''}
             onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
           />
-        </div>
-
-        {/* Children */}
-        <h2>Children</h2>
-        <div className={styles.childrenGrid}>
-          {children.map((child, i) => (
-            <div key={child.id} className={styles.childCard}>
-              <div className={styles.formGroup}>
-                <label>Full Name:</label>
-                <input
-                  type="text"
-                  value={child.full_name || ''}
-                  onChange={(e) => {
-                    const updated = [...children];
-                    updated[i].full_name = e.target.value;
-                    setChildren(updated);
-                  }}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Age:</label>
-                <input
-                  type="number"
-                  value={child.age || ''}
-                  onChange={(e) => {
-                    const updated = [...children];
-                    updated[i].age = e.target.value;
-                    setChildren(updated);
-                  }}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Grade:</label>
-                <input
-                  type="text"
-                  value={child.current_grade || ''}
-                  onChange={(e) => {
-                    const updated = [...children];
-                    updated[i].current_grade = e.target.value;
-                    setChildren(updated);
-                  }}
-                />
-              </div>
-            </div>
-          ))}
         </div>
 
         {/* Preferences */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Import useEffect
 import { useSaveFamilyData } from '../../../hooks/useSaveFamilyData';
 import { useDeleteChild } from '../../../hooks/useDeleteChild';
 import TickAnimation from '../../components/Sucess/TickAnimation';
@@ -6,7 +6,7 @@ import TickAnimation from '../../components/Sucess/TickAnimation';
 const SlidePanel = ({
   isOpen,
   onClose,
-  topPadding = 100,
+  topPadding = 0,
   userInfo = [],
   pickLocationMode,
   setPickLocationMode,
@@ -18,6 +18,7 @@ const SlidePanel = ({
   if (!user) return null;
 
   const [showTick, setShowTick] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({}); // State for validation errors
 
   // -------------------- Helpers --------------------
   const parseWorkplaceLocation = (loc) => {
@@ -56,6 +57,13 @@ const SlidePanel = ({
   const { saveFamilyData } = useSaveFamilyData();
   const { deleteChild } = useDeleteChild();
 
+  // Reset errors when panel opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setValidationErrors({});
+    }
+  }, [isOpen]);
+
   // -------------------- Handlers --------------------
   const handleUserChange = (field, value) => {
     setUserData((prev) => ({ ...prev, [field]: value }));
@@ -72,7 +80,7 @@ const SlidePanel = ({
         case 'kg2':
           return 'Grade 1';
         default:
-          return 'KG1';
+          return 'KG1'; // Default for early childhood if no specific grade
       }
     }
 
@@ -81,7 +89,10 @@ const SlidePanel = ({
       if (curriculum === 'american') {
         const gradeNum = parseFloat(grade);
         if (isNaN(gradeNum) || gradeNum < 0) return '';
-        return gradeNum >= 1 && gradeNum <= 12 ? `${gradeNum}th Grade` : 'Above Grade 12';
+        // Assuming American grades are 1-12
+        return gradeNum >= 1 && gradeNum <= 12
+          ? `${gradeNum}th Grade`
+          : 'Above Grade 12 / Below Grade 1';
       }
       if (curriculum === 'british') {
         switch (grade) {
@@ -143,32 +154,57 @@ const SlidePanel = ({
     const updatedChildren = [...userData.children];
     if (!updatedChildren[index]) return;
 
-    if (field === 'education_stage' && value === 'early_childhood_center') {
+    if (field === 'education_stage') {
+      // Reset grade and curriculum when stage changes to avoid inconsistencies
+      updatedChildren[index].current_grade = '';
+      updatedChildren[index].preferred_curriculum = '';
+    } else if (field === 'preferred_curriculum') {
+      // Reset grade when curriculum changes
       updatedChildren[index].current_grade = '';
     }
 
     updatedChildren[index][field] = value;
 
     const child = updatedChildren[index];
-    const grade = field === 'current_grade' ? value : child.current_grade;
-    const curriculum = field === 'preferred_curriculum' ? value : child.preferred_curriculum;
-    const stage = field === 'education_stage' ? value : child.education_stage;
+    const grade = child.current_grade;
+    const curriculum = child.preferred_curriculum;
+    const stage = child.education_stage;
 
     updatedChildren[index].uae_equivalent = getUaeClass(grade, curriculum, stage);
 
     setUserData((prev) => ({ ...prev, children: updatedChildren }));
+
+    // Clear specific child error when user starts typing/selecting
+    setValidationErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[`child_${index}_${field}`];
+      // Also clear general child error if this was the last error for the child
+      if (Object.keys(newErrors).filter((key) => key.startsWith(`child_${index}_`)).length === 0) {
+        delete newErrors[`child_${index}`];
+      }
+      return newErrors;
+    });
   };
 
   const handleDeleteChild = (index, childid) => {
     const updatedChildren = userData.children.filter((_, i) => i !== index);
     setUserData((prev) => ({ ...prev, children: updatedChildren }));
     if (childid) deleteChild(childid);
+    // Remove errors associated with the deleted child
+    setValidationErrors((prev) => {
+      const newErrors = { ...prev };
+      Object.keys(newErrors).forEach((key) => {
+        if (key.startsWith(`child_${index}_`) || key === `child_${index}`) {
+          delete newErrors[key];
+        }
+      });
+      return newErrors;
+    });
   };
 
   const handleAddChild = () => {
     const newChild = {
       full_name: '',
-      age: 0,
       current_grade: '',
       education_stage: '',
       preferred_curriculum: '',
@@ -177,9 +213,83 @@ const SlidePanel = ({
     setUserData((prev) => ({ ...prev, children: [...prev.children, newChild] }));
   };
 
+  // -------------------- Validation Logic --------------------
+  const validateForm = () => {
+    const errors = {};
+    let isValid = true;
+
+    // Validate Family Size
+    if (!familySize || parseFloat(familySize) <= 0) {
+      errors.familySize = 'Family size must be a positive number.';
+      isValid = false;
+    }
+
+    // Validate Children
+    userData.children.forEach((child, index) => {
+      let childHasErrors = false;
+      if (!child.full_name.trim()) {
+        errors[`child_${index}_full_name`] = 'Child name is required.';
+        childHasErrors = true;
+      }
+      if (!child.education_stage) {
+        errors[`child_${index}_education_stage`] = 'Education stage is required.';
+        childHasErrors = true;
+      }
+
+      // Validate preferred_curriculum only if stage is school
+      if (child.education_stage === 'school' && !child.preferred_curriculum) {
+        errors[`child_${index}_preferred_curriculum`] = 'Curriculum is required for school stage.';
+        childHasErrors = true;
+      }
+
+      // Validate current_grade based on stage and curriculum
+      if (
+        child.education_stage !== 'early_childhood_center' &&
+        !child.current_grade &&
+        child.education_stage
+      ) {
+        errors[`child_${index}_current_grade`] = 'Grade/Status is required.';
+        childHasErrors = true;
+      } else if (child.education_stage === 'school' && child.current_grade) {
+        const gradeNum = parseFloat(child.current_grade);
+        if (child.preferred_curriculum === 'american') {
+          if (isNaN(gradeNum) || gradeNum < 0 || gradeNum > 12) {
+            // Assuming American grades 1-12
+            errors[`child_${index}_current_grade`] = 'GPA must be between 0 and 12.';
+            childHasErrors = true;
+          }
+        } else if (child.preferred_curriculum === 'french') {
+          if (isNaN(gradeNum) || gradeNum < 0 || gradeNum > 20) {
+            errors[`child_${index}_current_grade`] = 'Score must be between 0 and 20.';
+            childHasErrors = true;
+          }
+        }
+        // British grades are handled by select, so no numerical validation needed here
+      } else if (child.education_stage === 'university' && child.current_grade) {
+        const score = parseFloat(child.current_grade);
+        if (isNaN(score) || score < 0 || score > 100) {
+          errors[`child_${index}_current_grade`] = 'GPA or % must be between 0 and 100.';
+          childHasErrors = true;
+        }
+      }
+      // Training center grade is handled by select, no numerical validation needed
+
+      if (childHasErrors) {
+        isValid = false;
+      }
+    });
+
+    setValidationErrors(errors);
+    return isValid;
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      return; // Stop if validation fails
+    }
+
     const locationToSave = selectedLocation ||
-      userData.workplace_location || { latitude: 25.224, longitude: 55.276 };
+      userData.workplace_location || { latitude: 25.224, longitude: 55.276 }; // Default to Dubai if nothing selected
     const result = await saveFamilyData(familySize, locationToSave, userData.children);
     if (result?.success) {
       setShowTick(true);
@@ -190,7 +300,6 @@ const SlidePanel = ({
     }
   };
 
-  // -------------------- Styles --------------------
   const infoRowStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -200,6 +309,7 @@ const SlidePanel = ({
     backgroundColor: '#e9e9e9',
     marginBottom: '10px',
     fontSize: '15px',
+    position: 'relative',
   };
   const sectionTitleStyle = {
     fontSize: '18px',
@@ -232,6 +342,17 @@ const SlidePanel = ({
     cursor: 'pointer',
     fontSize: '12px',
   };
+  const errorTextStyle = {
+    color: 'red',
+    fontSize: '12px',
+    marginTop: '4px',
+    // position: 'absolute',
+    // bottom: '-18px',
+    // left: '16px',
+  };
+  const inputErrorStyle = {
+    border: '1px solid red',
+  };
 
   // -------------------- Render --------------------
   return (
@@ -245,15 +366,19 @@ const SlidePanel = ({
         backgroundColor: '#fff',
         overflowY: 'auto',
         transition: 'width 0.3s ease',
-        zIndex: 20,
+        zIndex: 1000,
         padding: isOpen ? '40px' : '0',
         fontFamily: "'Poppins', sans-serif",
         color: '#333',
       }}
     >
       {isOpen && (
-        <div>
-          {/* Header */}
+        <div
+          style={{
+            paddingTop: 80,
+            paddingBottom: 80,
+          }}
+        >
           <div
             style={{
               display: 'flex',
@@ -281,16 +406,37 @@ const SlidePanel = ({
           <div style={{ marginBottom: '40px' }}>
             <div style={sectionTitleStyle}>User Information</div>
 
-            <div style={infoRowStyle}>
-              <span>Family Size</span>
-              <input
-                type="number"
-                min="1"
-                value={familySize}
-                onChange={(e) => setFamilySize(e.target.value)}
-                style={inputStyle}
-                placeholder="Enter family size"
-              />
+            <div style={{ ...infoRowStyle, flexDirection: 'column', alignItems: 'flex-start' }}>
+              {' '}
+              {/* Changed to column for error message */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+              >
+                <span>Family Size</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={familySize}
+                  onChange={(e) => {
+                    setFamilySize(e.target.value);
+                    setValidationErrors((prev) => {
+                      const newErrors = { ...prev };
+                      delete newErrors.familySize;
+                      return newErrors;
+                    });
+                  }}
+                  style={{ ...inputStyle, ...(validationErrors.familySize && inputErrorStyle) }}
+                  placeholder="Enter family size"
+                />
+              </div>
+              {validationErrors.familySize && (
+                <span style={errorTextStyle}>{validationErrors.familySize}</span>
+              )}
             </div>
 
             <div style={infoRowStyle}>
@@ -368,7 +514,9 @@ const SlidePanel = ({
                       borderRadius: '12px',
                       backgroundColor: '#fff',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                      borderLeft: '4px solid #ff5a5f',
+                      borderLeft: validationErrors[`child_${index}`]
+                        ? '4px solid red'
+                        : '4px solid #ff5a5f',
                       display: 'flex',
                       flexDirection: 'column',
                       gap: '8px',
@@ -386,7 +534,13 @@ const SlidePanel = ({
                         value={child.full_name || ''}
                         onChange={(e) => handleChildChange(index, 'full_name', e.target.value)}
                         placeholder="Enter child's name"
-                        style={{ ...inputStyle, fontWeight: 600, fontSize: '16px', width: '100%' }}
+                        style={{
+                          ...inputStyle,
+                          fontWeight: 600,
+                          fontSize: '16px',
+                          width: '100%',
+                          ...(validationErrors[`child_${index}_full_name`] && inputErrorStyle),
+                        }}
                       />
                       <button
                         style={deleteBtnStyle}
@@ -395,132 +549,240 @@ const SlidePanel = ({
                         Delete
                       </button>
                     </div>
+                    {validationErrors[`child_${index}_full_name`] && (
+                      <span style={{ ...errorTextStyle, marginLeft: 'auto' }}>
+                        {validationErrors[`child_${index}_full_name`]}
+                      </span>
+                    )}
+
+                    {/* Age field */}
 
                     {/* Stage */}
-                    <div style={infoRowStyle}>
-                      <span>Stage</span>
-                      <select
-                        value={child.education_stage || ''}
-                        onChange={(e) =>
-                          handleChildChange(index, 'education_stage', e.target.value)
-                        }
-                        style={inputStyle}
+                    <div
+                      style={{
+                        ...infoRowStyle,
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        margin: '0 0 10px 0',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                        }}
                       >
-                        <option value="">-- Select Stage --</option>
-                        <option value="early_childhood_center">Early Childhood Center</option>
-                        <option value="school">School</option>
-                        <option value="university">University</option>
-                        <option value="training_center">Training Center</option>
-                      </select>
-                    </div>
-
-                    {/* Curriculum */}
-                    <div style={infoRowStyle}>
-                      <span>Preferred Curriculum</span>
-                      <select
-                        value={child.preferred_curriculum || ''}
-                        onChange={(e) =>
-                          handleChildChange(index, 'preferred_curriculum', e.target.value)
-                        }
-                        style={inputStyle}
-                      >
-                        <option value="">-- Select Curriculum --</option>
-                        <option value="american">American</option>
-                        <option value="british">British</option>
-                        <option value="french">French</option>
-                      </select>
-                    </div>
-
-                    {/* Grade */}
-                    <div style={infoRowStyle}>
-                      <span>Grade</span>
-                      {child.education_stage === 'early_childhood_center' ? (
-                        <input
-                          type="text"
-                          value={child.current_grade || ''}
-                          placeholder="Grade not required (Nursery, KG1)"
-                          style={inputStyle}
-                          disabled
-                        />
-                      ) : child.education_stage === 'school' ? (
-                        <>
-                          {child.preferred_curriculum === 'american' && (
-                            <input
-                              type="number"
-                              min="0"
-                              max="4"
-                              step="0.1"
-                              value={child.current_grade || ''}
-                              onChange={(e) =>
-                                handleChildChange(index, 'current_grade', e.target.value)
-                              }
-                              placeholder="Enter GPA (0–4)"
-                              style={inputStyle}
-                            />
-                          )}
-                          {child.preferred_curriculum === 'british' && (
-                            <select
-                              value={child.current_grade || ''}
-                              onChange={(e) =>
-                                handleChildChange(index, 'current_grade', e.target.value)
-                              }
-                              style={inputStyle}
-                            >
-                              <option value="">-- Select Grade --</option>
-                              <option value="A*">A*</option>
-                              <option value="A">A</option>
-                              <option value="B">B</option>
-                              <option value="C">C</option>
-                              <option value="D">D</option>
-                              <option value="E">E</option>
-                              <option value="U">U</option>
-                            </select>
-                          )}
-                          {child.preferred_curriculum === 'french' && (
-                            <input
-                              type="number"
-                              min="0"
-                              max="20"
-                              value={child.current_grade || ''}
-                              onChange={(e) =>
-                                handleChildChange(index, 'current_grade', e.target.value)
-                              }
-                              placeholder="Enter Score (0–20)"
-                              style={inputStyle}
-                            />
-                          )}
-                        </>
-                      ) : child.education_stage === 'university' ? (
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={child.current_grade || ''}
-                          onChange={(e) =>
-                            handleChildChange(index, 'current_grade', e.target.value)
-                          }
-                          placeholder="Enter GPA or %"
-                          style={inputStyle}
-                        />
-                      ) : child.education_stage === 'training_center' ? (
+                        <span>Stage</span>
                         <select
-                          value={child.current_grade || ''}
+                          value={child.education_stage || ''}
                           onChange={(e) =>
-                            handleChildChange(index, 'current_grade', e.target.value)
+                            handleChildChange(index, 'education_stage', e.target.value)
                           }
-                          style={inputStyle}
+                          style={{
+                            ...inputStyle,
+                            ...(validationErrors[`child_${index}_education_stage`] &&
+                              inputErrorStyle),
+                          }}
                         >
-                          <option value="">-- Select Status --</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="completed">Completed</option>
-                          <option value="certified">Certified</option>
+                          <option value="">-- Select Stage --</option>
+                          <option value="early_childhood_center">Early Childhood Center</option>
+                          <option value="school">School</option>
+                          <option value="university">University</option>
+                          <option value="training_center">Training Center</option>
                         </select>
-                      ) : null}
+                      </div>
+                      {validationErrors[`child_${index}_education_stage`] && (
+                        <span style={errorTextStyle}>
+                          {validationErrors[`child_${index}_education_stage`]}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Curriculum - Conditionally rendered */}
+                    {child.education_stage === 'school' && (
+                      <div
+                        style={{
+                          ...infoRowStyle,
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          margin: '0 0 10px 0',
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            width: '100%',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>Preferred Curriculum</span>
+                          <select
+                            value={child.preferred_curriculum || ''}
+                            onChange={(e) =>
+                              handleChildChange(index, 'preferred_curriculum', e.target.value)
+                            }
+                            style={{
+                              ...inputStyle,
+                              ...(validationErrors[`child_${index}_preferred_curriculum`] &&
+                                inputErrorStyle),
+                            }}
+                          >
+                            <option value="">-- Select Curriculum --</option>
+                            <option value="american">American</option>
+                            <option value="british">British</option>
+                            <option value="french">French</option>
+                          </select>
+                        </div>
+                        {validationErrors[`child_${index}_preferred_curriculum`] && (
+                          <span style={errorTextStyle}>
+                            {validationErrors[`child_${index}_preferred_curriculum`]}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Grade - Conditionally rendered based on stage and curriculum */}
+                    <div
+                      style={{
+                        ...infoRowStyle,
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        margin: '0 0 10px 0',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          width: '100%',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span>Grade</span>
+                        {child.education_stage === 'early_childhood_center' ? (
+                          <input
+                            type="text"
+                            value={child.current_grade || ''}
+                            placeholder="Grade not required"
+                            style={inputStyle}
+                            disabled
+                          />
+                        ) : child.education_stage === 'school' ? (
+                          <>
+                            {child.preferred_curriculum === 'american' && (
+                              <input
+                                type="number"
+                                min="0"
+                                max="12" // Assuming grades up to 12th
+                                step="1"
+                                value={child.current_grade || ''}
+                                onChange={(e) =>
+                                  handleChildChange(index, 'current_grade', e.target.value)
+                                }
+                                placeholder="Enter Grade (1-12)"
+                                style={{
+                                  ...inputStyle,
+                                  ...(validationErrors[`child_${index}_current_grade`] &&
+                                    inputErrorStyle),
+                                }}
+                              />
+                            )}
+                            {child.preferred_curriculum === 'british' && (
+                              <select
+                                value={child.current_grade || ''}
+                                onChange={(e) =>
+                                  handleChildChange(index, 'current_grade', e.target.value)
+                                }
+                                style={{
+                                  ...inputStyle,
+                                  ...(validationErrors[`child_${index}_current_grade`] &&
+                                    inputErrorStyle),
+                                }}
+                              >
+                                <option value="">-- Select Grade --</option>
+                                <option value="A*">A*</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="U">U</option>
+                              </select>
+                            )}
+                            {child.preferred_curriculum === 'french' && (
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                value={child.current_grade || ''}
+                                onChange={(e) =>
+                                  handleChildChange(index, 'current_grade', e.target.value)
+                                }
+                                placeholder="Enter Score (0–20)"
+                                style={{
+                                  ...inputStyle,
+                                  ...(validationErrors[`child_${index}_current_grade`] &&
+                                    inputErrorStyle),
+                                }}
+                              />
+                            )}
+                          </>
+                        ) : child.education_stage === 'university' ? (
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={child.current_grade || ''}
+                            onChange={(e) =>
+                              handleChildChange(index, 'current_grade', e.target.value)
+                            }
+                            placeholder="Enter GPA or % (0-100)"
+                            style={{
+                              ...inputStyle,
+                              ...(validationErrors[`child_${index}_current_grade`] &&
+                                inputErrorStyle),
+                            }}
+                          />
+                        ) : child.education_stage === 'training_center' ? (
+                          <select
+                            value={child.current_grade || ''}
+                            onChange={(e) =>
+                              handleChildChange(index, 'current_grade', e.target.value)
+                            }
+                            style={{
+                              ...inputStyle,
+                              ...(validationErrors[`child_${index}_current_grade`] &&
+                                inputErrorStyle),
+                            }}
+                          >
+                            <option value="">-- Select Status --</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="certified">Certified</option>
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            value=""
+                            placeholder="Select stage first"
+                            style={inputStyle}
+                            disabled
+                          />
+                        )}
+                      </div>
+                      {validationErrors[`child_${index}_current_grade`] && (
+                        <span style={errorTextStyle}>
+                          {validationErrors[`child_${index}_current_grade`]}
+                        </span>
+                      )}
                     </div>
 
                     {/* UAE Equivalent */}
                     <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>
-                      UAE Equivalent: <strong>{child.uae_equivalent || ''}</strong>
+                      UAE Equivalent: <strong>{child.uae_equivalent || 'N/A'}</strong>
                     </div>
                   </div>
                 ))}

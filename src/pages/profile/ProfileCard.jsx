@@ -1,6 +1,7 @@
-import styles from "./Profile.module.css";
+import styles from './Profile.module.css';
 
 const ProfileCard = ({ title, data, isMultiItem = false }) => {
+  console.log(data);
   return (
     <div className={styles.profileCard}>
       <h2 className={styles.cardTitle}>{title}</h2>
@@ -11,7 +12,7 @@ const ProfileCard = ({ title, data, isMultiItem = false }) => {
               {Object.entries(item).map(([key, value]) => (
                 <div key={key}>
                   <span className={styles.fieldLabel}>{key} : </span>
-                  <span className={styles.fieldValue}>{value || "—"}</span>
+                  <span className={styles.fieldValue}>{value || '—'}</span>
                 </div>
               ))}
             </div>
@@ -21,7 +22,7 @@ const ProfileCard = ({ title, data, isMultiItem = false }) => {
             {Object.entries(data).map(([key, value]) => (
               <div key={key}>
                 <span className={styles.fieldLabel}>{key} : </span>
-                <span className={styles.fieldValue}>{value || "—"}</span>
+                <span className={styles.fieldValue}>{value || '—'}</span>
               </div>
             ))}
           </div>

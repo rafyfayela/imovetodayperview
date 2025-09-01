@@ -9,6 +9,7 @@ const Card = ({ item, type }) => {
       overflow: 'hidden',
       width: '100%',
       maxWidth: '24rem',
+      cursor: 'pointer',
       margin: '1rem auto',
     },
     image: {

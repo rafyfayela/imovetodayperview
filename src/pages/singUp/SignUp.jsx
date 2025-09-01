@@ -1,13 +1,12 @@
 // File: src/pages/SignUp/SignUp.jsx
 import React, { useState } from 'react';
 
-
 import styles from './SignUp.module.css';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../../hooks/useAuth';
 import TickAnimation from '../../components/Sucess/TickAnimation';
 import Lottie from 'lottie-react';
-import LoadingDots from "../../assets/lottie/Loading.json"
+import LoadingDots from '../../assets/lottie/Loading.json';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -15,18 +14,17 @@ const SignUp = () => {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const { signUp, loading, error } = useAuth();
   const [localError, setLocalError] = useState('');
   const [success, setSuccess] = useState(false);
-  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -42,12 +40,10 @@ const SignUp = () => {
     const data = await signUp(formData.email, formData.password, formData.fullName);
 
     if (data) {
-
-          setSuccess(true)
-          setTimeout(() => {
-            navigate('/login');
-          }, 1500);
-     
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/app');
+      }, 1500);
     }
   };
 
@@ -62,11 +58,13 @@ const SignUp = () => {
             </div>
 
             <form className={styles.signUpForm} onSubmit={handleSubmit}>
-             {(localError || error) && <p className={styles.error}>{localError || error}</p>}
+              {(localError || error) && <p className={styles.error}>{localError || error}</p>}
 
               {/* Full Name */}
               <div className={styles.formGroup}>
-                <label htmlFor="fullName" className={styles.formLabel}>Full Name</label>
+                <label htmlFor="fullName" className={styles.formLabel}>
+                  Full Name
+                </label>
                 <input
                   type="text"
                   id="fullName"
@@ -81,7 +79,9 @@ const SignUp = () => {
 
               {/* Email */}
               <div className={styles.formGroup}>
-                <label htmlFor="email" className={styles.formLabel}>Email Address</label>
+                <label htmlFor="email" className={styles.formLabel}>
+                  Email Address
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -96,7 +96,9 @@ const SignUp = () => {
 
               {/* Password */}
               <div className={styles.formGroup}>
-                <label htmlFor="password" className={styles.formLabel}>Password</label>
+                <label htmlFor="password" className={styles.formLabel}>
+                  Password
+                </label>
                 <input
                   type="password"
                   id="password"
@@ -111,7 +113,9 @@ const SignUp = () => {
 
               {/* Confirm Password */}
               <div className={styles.formGroup}>
-                <label htmlFor="confirmPassword" className={styles.formLabel}>Confirm Password</label>
+                <label htmlFor="confirmPassword" className={styles.formLabel}>
+                  Confirm Password
+                </label>
                 <input
                   type="password"
                   id="confirmPassword"
@@ -124,23 +128,25 @@ const SignUp = () => {
                 />
               </div>
 
-            <button type="submit" className={styles.submitButton} disabled={loading || success}>
-  {loading ? (
-    <Lottie
-      animationData={LoadingDots}
-      loop
-      autoplay
-      style={{ height: 40, width: 40 }}
-    />
-  ) : success ? (
-    <TickAnimation size={40} strokeColor="#FFF" />
-  ) : (
-    'Create Account'
-  )}
-</button>
+              <button type="submit" className={styles.submitButton} disabled={loading || success}>
+                {loading ? (
+                  <Lottie
+                    animationData={LoadingDots}
+                    loop
+                    autoplay
+                    style={{ height: 40, width: 40 }}
+                  />
+                ) : success ? (
+                  <TickAnimation size={40} strokeColor="#FFF" />
+                ) : (
+                  'Create Account'
+                )}
+              </button>
 
               <div className={styles.loginRedirect}>
-                <p>Already have an account? <Link to="/login">Log In</Link></p>
+                <p>
+                  Already have an account? <Link to="/login">Log In</Link>
+                </p>
               </div>
             </form>
           </div>

@@ -175,8 +175,21 @@ const MapComponent = ({
                 <Popup>
                   <div>
                     <h3>{property.name}</h3>
-
                     <p>Rating: {property.rating}</p>
+                    <button
+                      onClick={() => window.open(`/app/properties/${property.id}`, '_blank')}
+                      style={{
+                        marginTop: '5px',
+                        padding: '4px 8px',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </Popup>
               </Marker>
@@ -232,7 +245,7 @@ const MapComponent = ({
           right: 10,
           padding: '5px',
           borderRadius: '8px',
-          zIndex: 1000,
+          zIndex: 400,
           width: '180px',
         }}
       >

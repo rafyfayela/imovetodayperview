@@ -86,53 +86,55 @@ const Header = () => {
             <Logo />
           </div>
 
-          {/* {user && location.pathname.startsWith('/app') && (
-            <div className={styles.center}>
-              <AnimatePresence mode="wait">
-                {isScrolled && !isSearchExpanded ? (
-                  <motion.div
-                    key="miniSearch"
-                    variants={searchBarVariants}
-                    initial="initial"
-                    animate="animate"
-                    exit="exit"
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className={styles.miniSearchBar}
-                    onClick={() => setIsSearchExpanded(true)}
-                  >
-                    <span>Start your search</span>
-                    <div className={styles.miniSearchButton}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        width="1em"
-                        height="1em"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="segments"
-                    variants={segmentedControlVariants}
-                    initial="initial"
-                    animate="initial"
-                    exit="exit"
-                    transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className={styles.segmentedControlContainer}
-                  >
-                    {navButtons}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )} */}
+          {user &&
+            location.pathname.startsWith('/app') &&
+            location.pathname !== '/app/just-for-u' && (
+              <div className={styles.center}>
+                <AnimatePresence mode="wait">
+                  {isScrolled && !isSearchExpanded ? (
+                    <motion.div
+                      key="miniSearch"
+                      variants={searchBarVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className={styles.miniSearchBar}
+                      onClick={() => setIsSearchExpanded(true)}
+                    >
+                      <span>Start your search</span>
+                      <div className={styles.miniSearchButton}>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          width="1em"
+                          height="1em"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.5 3.75a6.75 6.75 0 100 13.5 6.75 6.75 0 000-13.5zM2.25 10.5a8.25 8.25 0 1114.59 5.28l4.69 4.69a.75.75 0 11-1.06 1.06l-4.69-4.69A8.25 8.25 0 012.25 10.5z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="segments"
+                      variants={segmentedControlVariants}
+                      initial="initial"
+                      animate="initial"
+                      exit="exit"
+                      transition={{ duration: 0.2, ease: 'easeOut' }}
+                      className={styles.segmentedControlContainer}
+                    >
+                      {navButtons}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
           <div className={styles.right}>
             {user ? (
@@ -151,26 +153,29 @@ const Header = () => {
         </div>
       </div>
 
-      {/* <AnimatePresence>
-        {(isSearchExpanded || !isScrolled) && user && location.pathname.startsWith('/app') && (
-          <motion.div
-            className={styles.bottomLevel}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-          >
-            <SearchBar
-              values={{ location: '', date: '', guests: '' }}
-              onChange={(key, value) => console.log(key, value)}
-              onSearch={(values) => {
-                console.log('Search clicked:', values);
-                setIsSearchExpanded(false);
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence> */}
+      <AnimatePresence>
+        {(isSearchExpanded || !isScrolled) &&
+          user &&
+          location.pathname.startsWith('/app') &&
+          location.pathname !== '/app/just-for-u' && (
+            <motion.div
+              className={styles.bottomLevel}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: 'easeInOut' }}
+            >
+              <SearchBar
+                values={{ location: '', date: '', guests: '' }}
+                onChange={(key, value) => console.log(key, value)}
+                onSearch={(values) => {
+                  console.log('Search clicked:', values);
+                  setIsSearchExpanded(false);
+                }}
+              />
+            </motion.div>
+          )}
+      </AnimatePresence>
     </header>
   );
 };
