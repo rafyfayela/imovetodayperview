@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './SchoolSidebar.module.css';
+import SmallLeaflet from '../../propertyDetails/components/SmallLeaflet';
 
 const SchoolSidebar = ({ contact, website, geolocation, location }) => {
   return (
@@ -56,20 +57,7 @@ const SchoolSidebar = ({ contact, website, geolocation, location }) => {
       <h3 className={styles.sectionTitle}>Location</h3>
 
       {geolocation ? (
-        (() => {
-          const coords = typeof geolocation === 'string' ? JSON.parse(geolocation) : geolocation;
-
-          return (
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${coords.latitude},${coords.longitude}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.driveButton}
-            >
-              Drive to Location
-            </a>
-          );
-        })()
+        <SmallLeaflet location={geolocation} />
       ) : (
         <p>Location information not available</p>
       )}

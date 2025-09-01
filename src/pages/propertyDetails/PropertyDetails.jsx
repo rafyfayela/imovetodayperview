@@ -9,6 +9,7 @@ import PropertyHeroSection from './components/PropertyHeroSection';
 import Reviews from './components/Reviews';
 import LoadingDot from '../../assets/lottie/Loading.json';
 import Lottie from 'lottie-react';
+import SmallLeaflet from './components/SmallLeaflet';
 
 const PropertyDetails = () => {
   const [property, setProperty] = useState(null);
@@ -120,17 +121,15 @@ const PropertyDetails = () => {
 
             <div className={styles.actionCard}>
               <h3 className={styles.sectionTitle}>Location</h3>
-              <p className={styles.locationText}>
-                <strong>Area:</strong> {location}
-              </p>
+
               <p className={styles.locationText}>
                 <strong>City:</strong> {city}
               </p>
               <div className={styles.mapContainer}>
-                {geolocation ? (
-                  <p>Map would be displayed here for: {geolocation}</p>
+                {location ? (
+                  <SmallLeaflet location={property.location} />
                 ) : (
-                  <p>Location information not available</p>
+                  <p>Location information </p>
                 )}
               </div>
             </div>
