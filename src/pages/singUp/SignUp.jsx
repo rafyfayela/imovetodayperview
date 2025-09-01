@@ -1,4 +1,3 @@
-// File: src/pages/SignUp/SignUp.jsx
 import React, { useState } from 'react';
 import styles from './SignUp.module.css';
 import { Link, useNavigate } from 'react-router-dom';
@@ -6,6 +5,7 @@ import useAuth from '../../../hooks/useAuth';
 import TickAnimation from '../../components/Sucess/TickAnimation';
 import Lottie from 'lottie-react';
 import LoadingDots from '../../assets/lottie/Loading.json';
+import { useAuthContext } from '../../../Provider/AuthProvider';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ const SignUp = () => {
   const { signUp, loading, error } = useAuth();
   const [localError, setLocalError] = useState('');
   const [success, setSuccess] = useState(false);
+  const { refreshProfile } = useAuthContext();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +38,7 @@ const SignUp = () => {
 
     if (data) {
       setSuccess(true);
+      await refreshProfile();
       setTimeout(() => navigate('/app'), 1500);
     }
   };

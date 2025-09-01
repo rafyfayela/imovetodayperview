@@ -91,9 +91,7 @@ const SlidePanel = ({
         const gradeNum = parseFloat(grade);
         if (isNaN(gradeNum) || gradeNum < 0) return '';
         // Assuming American grades are 1-12
-        return gradeNum >= 1 && gradeNum <= 12
-          ? `${gradeNum}th Grade`
-          : 'Above Grade 12 / Below Grade 1';
+        return gradeNum >= 1 && gradeNum <= 12 ? `${gradeNum}th Grade` : 'Grade 1';
       }
       if (curriculum === 'british') {
         switch (grade) {
@@ -110,7 +108,7 @@ const SlidePanel = ({
           case 'E':
             return '7th Grade';
           case 'U':
-            return 'Below 7th Grade';
+            return '7th Grade';
           default:
             return '';
         }
@@ -123,7 +121,7 @@ const SlidePanel = ({
         if (score >= 12) return '10th Grade';
         if (score >= 10) return '9th Grade';
         if (score >= 8) return '8th Grade';
-        return 'Below 8th Grade';
+        return '8th Grade';
       }
     }
 
@@ -134,7 +132,7 @@ const SlidePanel = ({
       if (score >= 80) return 'Year 3';
       if (score >= 70) return 'Year 2';
       if (score >= 60) return 'Year 1';
-      return 'Below Year 1';
+      return 'Year 1';
     }
 
     if (stage === 'training_center') {
@@ -156,11 +154,9 @@ const SlidePanel = ({
     if (!updatedChildren[index]) return;
 
     if (field === 'education_stage') {
-      // Reset grade and curriculum when stage changes to avoid inconsistencies
       updatedChildren[index].current_grade = '';
       updatedChildren[index].preferred_curriculum = '';
     } else if (field === 'preferred_curriculum') {
-      // Reset grade when curriculum changes
       updatedChildren[index].current_grade = '';
     }
 
@@ -423,6 +419,7 @@ const SlidePanel = ({
                 <input
                   type="number"
                   min="1"
+                  step="1"
                   value={familySize}
                   onChange={(e) => {
                     setFamilySize(e.target.value);
@@ -719,6 +716,7 @@ const SlidePanel = ({
                                 type="number"
                                 min="0"
                                 max="20"
+                                step="1"
                                 value={child.current_grade || ''}
                                 onChange={(e) =>
                                   handleChildChange(index, 'current_grade', e.target.value)

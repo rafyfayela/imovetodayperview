@@ -16,9 +16,8 @@ const JustForU = () => {
   const { data, loading: justLoad } = useNearbyPropertiesAndSchools(radiusKm, refreshTrigger);
 
   const toggleRef = useRef(null);
-  const [topPadding, setTopPadding] = useState(100); // default spacing for toggle
+  const [topPadding, setTopPadding] = useState(100);
 
-  // Open panel if no children
   useEffect(() => {
     if (userInfo && (!userInfo.children || userInfo.children.length === 0)) {
       setIsPanelOpen(true);
@@ -33,16 +32,14 @@ const JustForU = () => {
     };
   }, []);
 
-  // Dynamically adjust top padding based on toggle button height
   useEffect(() => {
     if (toggleRef.current) {
-      setTopPadding(toggleRef.current.offsetHeight + 20); // 20px extra spacing
+      setTopPadding(toggleRef.current.offsetHeight + 20);
     }
   }, [toggleRef.current]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      {/* Left side: listings + slide panel */}
       <div
         style={{
           flex: 1,
